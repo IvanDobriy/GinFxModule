@@ -1,4 +1,4 @@
-package fatcory
+package factory
 
 import (
 	"fmt"
@@ -25,15 +25,15 @@ type Factory struct {
 	ConfigAliases *ConfigAliases
 }
 
-func NewConfig(paths ...string) (*Config, error) {
-	return &Config{}, nil
+func NewConfig(paths ...string) (*ConfigAliases, error) {
+	return &ConfigAliases{}, nil
 }
 
-func NewFactory(configAliases *ConfigAliases) *Factory {
+func NewFactory(configAliases *ConfigAliases) (*Factory, error) {
 	factory := &Factory{
 		ConfigAliases: configAliases,
 	}
-	return factory
+	return factory, nil
 }
 
 func (f *Factory) NewGinEngine(alias Alias) (*gin.Engine, error) {

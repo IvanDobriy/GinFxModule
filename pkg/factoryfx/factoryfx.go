@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/IvanDobriy/GinFxModule/pkg/factory"
-	"github.com/ethereum/go-ethereum/beacon/engine"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/fx"
 )
@@ -28,7 +27,7 @@ func newConfig(paths ...string) func() (ConfigResult, error) {
 
 type FactoryParatertes struct {
 	fx.In
-	config *factory.ConfigAliases
+	Config *factory.ConfigAliases
 }
 
 type FactoryResult struct {
@@ -37,7 +36,7 @@ type FactoryResult struct {
 }
 
 func newFactory(params FactoryParatertes) (FactoryResult, error) {
-	f, err := factory.NewFactory(params.config)
+	f, err := factory.NewFactory(params.Config)
 	if err != nil {
 		return FactoryResult{}, err
 	}
@@ -46,14 +45,10 @@ func newFactory(params FactoryParatertes) (FactoryResult, error) {
 	}, nil
 }
 
-type InwokerConfig struct {
-	alieas      factory.Alias
-	conifgPaths []string
-}
 
-func NewServerInwoker(config InwokerConfig, handlerConfigurators ...func(engine *gin.Engine) error) func(lc fx.Lifecycle, f *factory.Factory) error {
+func NewServerInwoker(alias factory.Alias, handlerConfigurators ...func(engine *gin.Engine) error) func(lc fx.Lifecycle, f *factory.Factory) error {
 	return func(lc fx.Lifecycle, f *factory.Factory) error {
-		engine, err := f.NewGinEngine(config.alieas)
+		engine, err := f.NewGinEngine(alias)
 		if err != nil {
 			return err
 		}
@@ -62,7 +57,7 @@ func NewServerInwoker(config InwokerConfig, handlerConfigurators ...func(engine 
 				return err
 			}
 		}
-		s, err := f.NewServer(config.alieas, engine)
+		s, err := f.NewServer(alias, engine)
 		if err != nil {
 			return err
 		}
@@ -78,5 +73,18 @@ func NewServerInwoker(config InwokerConfig, handlerConfigurators ...func(engine 
 			},
 		)
 		return nil
+	}
+}
+
+func NewModule(configPaths ...string) func() fx.Option {
+	moduleName := "gin server module"
+	return func() fx.Option {
+		module := fx.Module(moduleName,
+			fx.Provide(
+				newConfig(configPaths...),
+				newFactory,
+			),
+		)
+		return module
 	}
 }

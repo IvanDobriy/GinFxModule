@@ -45,8 +45,9 @@ func newFactory(params FactoryParatertes) (FactoryResult, error) {
 	}, nil
 }
 
+type HandlerConfigurator func(engine *gin.Engine) error
 
-func NewServerInwoker(alias factory.Alias, handlerConfigurators ...func(engine *gin.Engine) error) func(lc fx.Lifecycle, f *factory.Factory) error {
+func NewServerInwoker(alias factory.Alias, handlerConfigurators []HandlerConfigurator) func(lc fx.Lifecycle, f *factory.Factory) error {
 	return func(lc fx.Lifecycle, f *factory.Factory) error {
 		engine, err := f.NewGinEngine(alias)
 		if err != nil {

@@ -109,7 +109,10 @@ func NewConfig(paths ...string) (ca *ConfigAliases, err error) {
 	if err != nil {
 		return nil, err
 	}
-	yaml.Unmarshal(raw, &configMap)
+	err = yaml.Unmarshal(raw, &configMap)
+	if err != nil {
+		return nil, err
+	}
 	return GetConfigAlasesFromMap(configMap)
 }
 

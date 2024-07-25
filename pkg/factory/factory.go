@@ -1,7 +1,6 @@
 package factory
 
 import (
-	"bufio"
 	"fmt"
 	"io"
 	"net/http"

@@ -1,7 +1,9 @@
 package factory
 
 import (
+	"bufio"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"time"
@@ -9,6 +11,7 @@ import (
 	"github.com/IvanDobriy/tag/pkg/tag"
 	"github.com/IvanDobriy/tag/pkg/tag/cast"
 	"github.com/gin-gonic/gin"
+	"gopkg.in/yaml.v3"
 )
 
 type Alias string
@@ -102,8 +105,13 @@ func NewConfig(paths ...string) (ca *ConfigAliases, err error) {
 			err = e
 		}
 	}()
-
-	return &ConfigAliases{}, nil
+	configMap := map[string]any{}
+	raw, err := io.ReadAll(conf)
+	if err != nil {
+		return nil, err
+	}
+	yaml.Unmarshal(raw, &configMap)
+	return GetConfigAlasesFromMap(configMap)
 }
 
 func NewFactory(configAliases *ConfigAliases) (*Factory, error) {
